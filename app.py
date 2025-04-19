@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # Load the models and preprocessing tools
-with open("naive_bayes.pkl", "rb") as f:
+with open("naive_bayes .pkl", "rb") as f:
     nb_model = pickle.load(f)
 
 with open("svm_model.pkl", "rb") as f:
