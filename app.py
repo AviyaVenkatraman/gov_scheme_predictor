@@ -23,7 +23,7 @@ with open("label_encoder.pkl", "rb") as f:
 @app.route("/")
 def home():
     with open('index.html', 'r') as f:
-    return render_template_string(f.read())  # Serve the HTML form
+        return render_template_string(f.read())  # Serve the HTML form
 
 @app.route("/predict", methods=["POST"])
 def predict():
