@@ -133,12 +133,13 @@
 
         <button type="submit">Predict Scheme</button>
     </form>
-
-    {% if prediction_nb and prediction_svm %}
-        <h2>Predictions:</h2>
+{% if prediction_nb and prediction_svm %}
+    <div class="results">
+        <h2>Predicted Schemes</h2>
         <p><strong>Naive Bayes:</strong> {{ prediction_nb }}</p>
         <p><strong>SVM:</strong> {{ prediction_svm }}</p>
-    {% endif %}
+    </div>
+{% endif %}
 </body>
 </html>
 
