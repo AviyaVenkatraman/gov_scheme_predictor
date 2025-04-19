@@ -5,7 +5,7 @@ import pandas as pd
 app = Flask(__name__)
 
 # Load models and encoders
-with open("naive_bayes.pkl", "rb") as f:
+with open("naive_bayes .pkl", "rb") as f:
     nb_model = pickle.load(f)
 
 with open("svm_model.pkl", "rb") as f:
