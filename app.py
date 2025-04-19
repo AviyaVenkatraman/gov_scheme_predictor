@@ -25,8 +25,9 @@ def home():
     with open('index.html', 'r') as f:
         return render_template_string(f.read())  # Serve the HTML form
 
-@app.route("/predict", methods=["POST"])
+@app.route("/predict", methods=['GET', 'POST'])
 def predict():
+    if request.method == 'post':
     data = request.form
     df = pd.DataFrame([{
         'Category': data['category'],
