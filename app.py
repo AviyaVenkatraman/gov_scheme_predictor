@@ -1,58 +1,48 @@
+from flask import Flask, request, jsonify, send_file
 import pickle
-from flask import Flask, request, jsonify
+import pandas as pd
+import os
 
 app = Flask(__name__)
 
-# Load the models and preprocessing tools
-with open("naive_bayes .pkl", "rb") as f:
+# Load models and encoders
+with open('naive_bayes.pkl', 'rb') as f:
     nb_model = pickle.load(f)
 
-with open("svm_model.pkl", "rb") as f:
+with open('svm_model.pkl', 'rb') as f:
     svm_model = pickle.load(f)
 
-with open("preprocessor_nb.pkl", "rb") as f:
+with open('preprocessor_nb.pkl', 'rb') as f:
     preprocessor_nb = pickle.load(f)
 
-with open("preprocessor_svm.pkl", "rb") as f:
+with open('preprocessor_svm.pkl', 'rb') as f:
     preprocessor_svm = pickle.load(f)
 
-with open("label_encoder.pkl", "rb") as f:
+with open('label_encoder.pkl', 'rb') as f:
     label_encoder = pickle.load(f)
 
+@app.route('/')
+def serve_index():
+    return send_file('index.html')
 
-@app.route("/")
-def home():
-    return "Government Scheme Predictor API is running!"
-
-
-@app.route("/predict", methods=["POST"])
+@app.route('/predict', methods=['POST'])
 def predict():
-    try:
-        data = request.get_json()
+    data = request.json
+    input_df = pd.DataFrame([data])
 
-        # Convert input to dataframe-like format for preprocessing
-        input_df = [data]
+    input_nb = preprocessor_nb.transform(input_df)
+    input_svm = preprocessor_svm.transform(input_df)
 
-        # Preprocess for each model
-        processed_nb = preprocessor_nb.transform(input_df)
-        processed_svm = preprocessor_svm.transform(input_df)
+    pred_nb = label_encoder.inverse_transform(nb_model.predict(input_nb))[0]
+    pred_svm = label_encoder.inverse_transform(svm_model.predict(input_svm))[0]
 
-        # Predict
-        nb_pred = nb_model.predict(processed_nb)[0]
-        svm_pred = svm_model.predict(processed_svm)[0]
-
-        # Decode labels
-        nb_scheme = label_encoder.inverse_transform([nb_pred])[0]
-        svm_scheme = label_encoder.inverse_transform([svm_pred])[0]
-
-        return jsonify({
-            "naive_bayes_prediction": nb_scheme,
-            "svm_prediction": svm_scheme
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)})
+    return jsonify({
+        'Naive Bayes Prediction': pred_nb,
+        'SVM Prediction': pred_svm
+    })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)  # or any port, like 5000
+    port = int(os.environ.get("PORT", 10000))
+    app.run(debug=False, host='0.0.0.0', port=port)
+
 
