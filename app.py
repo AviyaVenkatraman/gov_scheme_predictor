@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, render_template_string
 import pickle
 import pandas as pd
 
@@ -27,31 +27,40 @@ def home():
 
 @app.route("/predict", methods=['GET', 'POST'])
 def predict():
-    if request.method == 'post':
+    if request.method == 'POST':
         data = request.form
         df = pd.DataFrame([{
-            'Category': data['category'],
-            'Education': data['education'],
-            'Employment': data['employment'],
-            'Marital status': data['marital status'],
-            'Area': data['area']
-    }])
+            'Category': data['Category'],
+            'Education': data['Education'],
+            'Employment': data['Employment'],
+            'Marital_Status': data['Marital_Status'],
+            'Area': data['Area'],
+            'Disability': data['Disability'],
+            'Income': data['Income'],
+            'Age': data['Age'],
+            'Gender': data['Gender']
+        }])
 
-    # Preprocess
-    input_nb = preprocessor_nb.transform(df)
-    input_svm = preprocessor_svm.transform(df)
+        # Preprocess the input
+        input_nb = preprocessor_nb.transform(df)
+        input_svm = preprocessor_svm.transform(df)
 
-    # Predictions
-    nb_pred = label_encoder.inverse_transform(nb_model.predict(input_nb))[0]
-    svm_pred = label_encoder.inverse_transform(svm_model.predict(input_svm))[0]
+        # Predict
+        nb_pred = label_encoder.inverse_transform(nb_model.predict(input_nb))[0]
+        svm_pred = label_encoder.inverse_transform(svm_model.predict(input_svm))[0]
 
-    return jsonify({
-        "naive_bayes": nb_pred,
-        "svm": svm_pred
-    })
+        with open('index.html', 'r') as f:
+            html = f.read()
+        return render_template_string(
+            html,
+            prediction_nb=nb_pred,
+            prediction_svm=svm_pred
+        )
+    return "Invalid request method.", 405
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
 
 
 
