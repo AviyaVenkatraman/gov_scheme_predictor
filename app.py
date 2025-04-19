@@ -28,13 +28,13 @@ def home():
 @app.route("/predict", methods=['GET', 'POST'])
 def predict():
     if request.method == 'post':
-    data = request.form
-    df = pd.DataFrame([{
-        'Category': data['category'],
-        'Education': data['education'],
-        'Employment': data['employment'],
-        'Marital status': data['marital status'],
-        'Area': data['area']
+        data = request.form
+        df = pd.DataFrame([{
+            'Category': data['category'],
+            'Education': data['education'],
+            'Employment': data['employment'],
+            'Marital status': data['marital status'],
+            'Area': data['area']
     }])
 
     # Preprocess
