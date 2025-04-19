@@ -1,4 +1,3 @@
-# gov_scheme_predictor
 # Government Scheme Predictor
 
 This web application predicts eligible government schemes for users based on their input using machine learning models (Naive Bayes and SVM).
