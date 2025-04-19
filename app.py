@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, render_template_string
 import pickle
 import pandas as pd
 
@@ -22,12 +22,19 @@ with open("label_encoder.pkl", "rb") as f:
 
 @app.route("/")
 def home():
-    return send_file("index.html")  # Serve the HTML form
+    with open('index.html', 'r') as f;
+    return render_template_string(f.read())  # Serve the HTML form
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    data = request.json
-    df = pd.DataFrame([data])
+    data = request.form
+    df = pd.DataFrame([{
+        'Category': data['category'],
+        'Education': data['education'],
+        'Employment': data['employment'],
+        'Marital status': data['marital status'],
+        'Area': data['area']
+    }])
 
     # Preprocess
     input_nb = preprocessor_nb.transform(df)
