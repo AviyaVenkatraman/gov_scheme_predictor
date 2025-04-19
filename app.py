@@ -1,52 +1,49 @@
-from flask import Flask, request, jsonify
 import pickle
-import numpy as np
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Load the trained models and preprocessing tools
-with open("naive_bayes_model.pkl", "rb") as f:
+# Load the models and preprocessing tools
+with open("naive_bayes.pkl", "rb") as f:
     nb_model = pickle.load(f)
 
 with open("svm_model.pkl", "rb") as f:
     svm_model = pickle.load(f)
 
-with open("preprocessor.pkl", "rb") as f:
-    preprocessor = pickle.load(f)
+with open("preprocessor_nb.pkl", "rb") as f:
+    preprocessor_nb = pickle.load(f)
+
+with open("preprocessor_svm.pkl", "rb") as f:
+    preprocessor_svm = pickle.load(f)
 
 with open("label_encoder.pkl", "rb") as f:
     label_encoder = pickle.load(f)
 
+
 @app.route("/")
 def home():
-    return "Government Scheme Predictor is running!"
+    return "Government Scheme Predictor API is running!"
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
-        input_features = [[
-            data["Age"],
-            data["Gender"],
-            data["Income"],
-            data["Employment"],
-            data["Education"],
-            data["Category"],
-            data["Disability"],
-            data["Marital_Status"],
-            data["Area"]
-        ]]
 
-        # Preprocess the input
-        X = preprocessor.transform(input_features)
+        # Convert input to dataframe-like format for preprocessing
+        input_df = [data]
 
-        # Predict with Naive Bayes and SVM
-        nb_pred = nb_model.predict(X)
-        svm_pred = svm_model.predict(X)
+        # Preprocess for each model
+        processed_nb = preprocessor_nb.transform(input_df)
+        processed_svm = preprocessor_svm.transform(input_df)
 
-        # Decode predictions
-        nb_scheme = label_encoder.inverse_transform(nb_pred)[0]
-        svm_scheme = label_encoder.inverse_transform(svm_pred)[0]
+        # Predict
+        nb_pred = nb_model.predict(processed_nb)[0]
+        svm_pred = svm_model.predict(processed_svm)[0]
+
+        # Decode labels
+        nb_scheme = label_encoder.inverse_transform([nb_pred])[0]
+        svm_scheme = label_encoder.inverse_transform([svm_pred])[0]
 
         return jsonify({
             "naive_bayes_prediction": nb_scheme,
@@ -56,6 +53,8 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(debug=True)
+
 
